@@ -1,0 +1,74 @@
+---
+output: 
+  pdf_document:
+    keep_tex: yes
+    fig_caption: yes
+    number_sections: yes
+geometry: margin=2.54cm
+title: "Insert title of project here"
+subtitle: "Web address for GitHub repository"
+author: "Name"
+fontsize: 12pt
+mainfont: Times New Roman
+
+---
+
+\newpage
+
+```{r setup, include=FALSE}
+# Set your working directory
+getwd()
+# Load your packages
+library(EcoHydRology)
+library(tidyverse)
+library(cowplot)
+library(dataRetrieval)
+library(lubridate)
+library(lfstat)
+
+# Set your ggplot theme
+theme_set(theme_dark())
+# Load your datasets
+
+```
+
+
+# Rationale and Research Questions
+As we go out into a new world racked with climate change, we will encounter shifts in weather patterns with drastic consequences. As environmental managers we must be aware of alternate regimes and their potential consequences. To this end I am investigating effects of El Niño and La Niña on streams in Washington state. I will focus on discharge data to investigate potential effects on water supply throughout the year.
+
+#Discharge displays effects of?
+
+\newpage
+
+# Dataset Information
+
+
+
+\newpage
+
+# Exploratory Analysis 
+
+
+
+\newpage
+
+# Analysis
+
+
+
+## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+
+## Question 2: 
+
+
+
+
+\newpage
+
+# Summary and Conclusions
+
+
+\newpage
+
+# References
+<add references here if relevant, otherwise delete this section> 

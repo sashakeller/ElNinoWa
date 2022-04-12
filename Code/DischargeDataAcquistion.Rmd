@@ -1,0 +1,69 @@
+---
+title: "Discharge Data"
+author: "Sasha Keller"
+date: "4/12/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, include=FALSE}
+# Set your working directory
+getwd()
+# Load your packages
+library(EcoHydRology)
+library(tidyverse)
+library(cowplot)
+library(dataRetrieval)
+library(lubridate)
+library(lfstat)
+
+# Set your ggplot theme
+theme_set(theme_dark())
+# Load your datasets
+
+```
+
+```{r}
+
+DuckabushDischarge <- readNWISdv(siteNumbers = "12054000",
+                     parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "1974-10-01", 
+                     endDate = "2021-09-30")
+
+PuyallupDischarge <- readNWISdv(siteNumbers = "12101500",
+                     parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "1974-10-01", 
+                     endDate = "2021-09-30")
+
+names(DuckabushDischarge)[4:5] <- c("Discharge", "Approval.Code")
+names(PuyallupDischarge)[4:5] <- c("Discharge", "Approval.Code")
+
+attr(DuckabushDischarge, "variableInfo")
+attr(DuckabushDischarge, "siteInfo")
+  
+ggplot(DuckabushDischarge, aes(x = Date, y = Discharge)) +
+  geom_line() +
+  labs(x = "Year", y = "Discharge (cfs)")
+  
+attr(PuyallupDischarge, "variableInfo")
+attr(PuyallupDischarge, "siteInfo")
+  
+ggplot(PuyallupDischarge, aes(x = Date, y = Discharge)) +
+  geom_line() +
+  labs(x = "Year", y = "Discharge (cfs)")
+
+```
+
+
+
+
+
+
+
+
+
+
+
