@@ -56,10 +56,56 @@ ggplot(PuyallupDischarge, aes(x = Date, y = Discharge)) +
   labs(x = "Year", y = "Discharge (cfs)")
 
 ```
+```{r}
+#Climate events will be identified using NOAA's Climate Prediction Center (https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php).
+#El Nino events should create a warmer, drier climate in Washington while La Nina will create a cooler, wetter environment. 
 
 
+DuckabushDischarge <- DuckabushDischarge %>%
+  mutate(Baseflow_lfstat = baseflow(Discharge), 
+         Stormflow_lfstat = Discharge - Baseflow_lfstat,
+         Year = year(Date), 
+         WaterYear = water_year(Date))
+DuckabushDischarge$WaterYear <- as.numeric(as.character(DuckabushDischarge$WaterYear))
 
 
+PuyallupDischarge <- PuyallupDischarge %>%
+  mutate(Baseflow_lfstat = baseflow(Discharge), 
+         Stormflow_lfstat = Discharge - Baseflow_lfstat,
+         Year = year(Date), 
+         WaterYear = water_year(Date))
+PuyallupDischarge$WaterYear <- as.numeric(as.character(PuyallupDischarge$WaterYear))
+
+END1<- DuckabushDischarge %>%
+  filter(Date> "2014-8-30" & Date<"2016-6-1")
+ENP1<-PuyallupDischarge %>%
+  filter(Date> "2014-8-30" & Date<"2016-6-1")
+
+LND1<- DuckabushDischarge %>%
+  filter(Date> "2010-4-30" & Date<"2012-6-1")
+LNP1<-PuyallupDischarge %>%
+  filter(Date> "2010-4-30" & Date<"2012-6-1")
+
+ggplot(DuckabushDischarge, aes(x=Date, y=Discharge))+
+  geom_line()
+
+
+ggplot(END1, aes(x=Date,y=Discharge))+
+  geom_line(color="white")+
+  geom_line(aes(y=Baseflow_lfstat))
+
+
+ggplot(LND1, aes(x=Date,y=Discharge))+
+  geom_line(color="white")+
+  geom_line(aes(y=Baseflow_lfstat))
+
+```
+
+Questions: 
+Is 3 month seasonal mean common water format or just climate data?
+Causes for changes in discharge?
+How to identify relevant baseflow with so many ~*events*~ happening?
+What is proper to compare?
 
 
 
