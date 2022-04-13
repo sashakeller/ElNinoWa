@@ -103,9 +103,23 @@ ggplot(LND1, aes(x=Date,y=Discharge))+
 
 Questions: 
 Is 3 month seasonal mean common water format or just climate data?
+
+
 Causes for changes in discharge?
+el nino la nina working as intended
+el nino la nina 
+
+
+
 How to identify relevant baseflow with so many ~*events*~ happening?
+
+
+
+
 What is proper to compare?
+code la nina, el nino, neither times to the data set then do summary stats to investigate? t test?
+
+
 
 
 
