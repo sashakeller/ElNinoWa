@@ -19,7 +19,7 @@ library(cowplot)
 library(dataRetrieval)
 library(lubridate)
 library(lfstat)
-
+library(trend)
 # Set your ggplot theme
 theme_set(theme_dark())
 # Load your datasets
@@ -75,6 +75,49 @@ PuyallupDischarge <- PuyallupDischarge %>%
          Year = year(Date), 
          WaterYear = water_year(Date))
 PuyallupDischarge$WaterYear <- as.numeric(as.character(PuyallupDischarge$WaterYear))
+```
+
+```{r, el nino/la nina classes}
+
+
+DuckabushDischarge <- DuckabushDischarge %>%
+  mutate(season.class = case_when(Date> "2002-4-30" & Date<"2003-4-1"
+                                  | Date>"2004-5-31" & Date<"2005-4-1"
+                                  | Date>"2006-7-31" & Date<"2007-3-1"
+                                  | Date>"2009-5-31" & Date<"2010-5-1"
+                                  | Date> "2014-8-30" & Date<"2016-6-1"
+                                  | Date>"2018-7-31" & Date<"2019-8-1" ~ "El_Nino",
+                                  Date> "2005-9-30" & Date<"2006-5-1"
+                                  | Date>"2004-5-31" & Date<"2005-4-1"
+                                  | Date>"2007-4-30" & Date<"2008-8-1"
+                                  | Date>"2008-9-30" & Date<"2009-5-1"
+                                  | Date> "2010-4-30" & Date<"2012-6-1"
+                                  | Date> "2016-6-30" & Date<"2017-2-1"
+                                  | Date> "2017-8-30" & Date<"2018-6-1"
+                                  | Date> "2020-6-30" & Date<"2022-4-1" ~ "La_Nina",
+                                  TRUE ~ "Neutral"
+                                  ))
+
+# create a data frame of months
+Months <- data.frame(Date_monthrounded = seq.Date(from = as.Date("2000-10-01"), to = as.Date("2022-4-01"), by = "month"))
+
+
+# generate total monthly discharge
+Duckabush_proccessed_monthly <- DuckabushDischarge %>%
+  mutate(Year = year(Date),
+         Month = month(Date)) %>%
+  group_by(Year, Month) %>%
+  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
+
+Duckabush_timeseries <- ts(Duckabush_proccessed_monthly$Discharge_acftmo, frequency = 12,
+                           start = c(2000, 1, 1), end = c(2022, 4, 1))
+
+Duckabush_trend<- smk.test(Duckabush_timeseries)
+
+Duckabush_trend
+summary(Duckabush_trend)
+```
+
 
 END1<- DuckabushDischarge %>%
   filter(Date> "2014-8-30" & Date<"2016-6-1")
@@ -99,7 +142,6 @@ ggplot(LND1, aes(x=Date,y=Discharge))+
   geom_line(color="white")+
   geom_line(aes(y=Baseflow_lfstat))
 
-```
 
 Questions: 
 Is 3 month seasonal mean common water format or just climate data?
@@ -118,6 +160,10 @@ How to identify relevant baseflow with so many ~*events*~ happening?
 
 What is proper to compare?
 code la nina, el nino, neither times to the data set then do summary stats to investigate? t test?
+
+
+SMK t test for artifical seasons? 
+Can I just recode El Nino/La Nina/Neither as 1,2,3 and run a t test frequency = 3?
 
 
 
