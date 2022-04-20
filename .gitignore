@@ -38,5 +38,11 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
+<<<<<<< HEAD
 ./Data/Raw/data.nc
 ./Data/Raw/sst.mnmean.nc
+=======
+.Data/Raw/data.nc
+
+.Data/Raw/sst.mnmean.nc
+>>>>>>> 9bbedfdce3ac37a32fcd989d6916e610d9e1df62
