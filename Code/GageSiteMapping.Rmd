@@ -1,0 +1,97 @@
+---
+title: "Untitled"
+author: "Sasha Keller"
+date: "4/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(dataRetrieval)
+library(maps)
+library(sf)
+# install.packages("nhdplusTools")
+library(nhdplusTools)
+
+theme_set(theme_classic())
+options(scipen = 5)
+
+
+```
+```{r}
+# Recall there are a lot of parameters measured at the site
+NeuseParams <- whatNWISdata(siteNumbers = "12054000")
+
+# Extract latitude and longitude for the site
+NeuseCoords <- NeuseParams %>%
+  select(site_no, dec_lat_va, dec_long_va) %>%
+  distinct()
+
+# Define the gage site as the starting point
+start_point <- st_sfc(st_point(c(NeuseCoords$dec_long_va, NeuseCoords$dec_lat_va)), 
+                      crs = 4269) # NAD83, commonly  used by US agencies
+start_comid <- discover_nhdplus_id(start_point)
+# start_point2 <- st_as_sf(data.frame(x = NeuseCoords$dec_long_va, y =  NeuseCoords$dec_lat_va), 
+#                             coords = c("x", "y"), crs = 4269)
+
+# Navigate the NLDI network
+NLDI <- navigate_nldi(list(featureSource = "comid", featureID = start_comid), 
+                          mode = "upstreamTributaries", 
+                          distance_km = 1000)
+
+# Extract watershed and flowpath information
+subset_file <- tempfile(fileext = ".gpkg")
+subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
+                         output_file = subset_file,
+                         nhdplus_data = "download", 
+                         flowline_only = FALSE,
+                         return_data = TRUE, overwrite = TRUE)
+
+# Create data frames
+flowline <- subset$NHDFlowline_Network
+catchment <- subset$CatchmentSP
+waterbody <- subset$NHDWaterbody
+
+class(flowline)
+class(catchment)
+class(waterbody)
+
+# find gages near watershed
+gages <- get_nwis(AOI = catchment)
+class(gages)
+
+# find gages only within watershed
+gages <- st_intersection(gages, catchment)
+
+
+
+
+```
+
+
+```{r}
+
+plot_nhdplus("USGS-12054000", streamorder = 3)
+
+states <- st_as_sf(map(database = "state", plot = FALSE, fill = TRUE, col = "white"))
+wa <- filter(states, ID == "washington")
+
+ggplot(wa) +
+  geom_sf(fill = "white") +
+  geom_sf(data = flowline, aes(color = streamorde)) +
+  labs(color = "Stream Order") +
+  theme(legend.position = "top")
+
+ggplot(catchment) +
+  geom_sf(fill = "white", color = "gray", lwd = 0.5) +
+  geom_sf(data = flowline, aes(color = streamorde)) +
+  geom_sf(data = gages, color = "darkred", size = 1) +
+  labs(color = "Stream Order") +
+  theme(legend.position = "top")
+
+
+```

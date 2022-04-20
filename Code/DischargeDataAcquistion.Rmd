@@ -23,39 +23,92 @@ theme_set(theme_dark())
 ```
 
 ```{r} 
+#Tulalip
 TulalipDischarge <- readNWISdv(siteNumbers = "12158040",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
+names(TulalipDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(TulalipDischarge, "variableInfo")
+attr(TulalipDischarge, "siteInfo")
 
+TulalipProccessed <- TulalipDischarge %>%
+  mutate(Baseflow = baseflow(Discharge), 
+         Stormflow = Discharge - Baseflow,
+         Year = year(Date), 
+         WaterYear = water_year(Date),
+         Year = year(Date),
+         Month = month(Date),
+         Discharge_acftmo = sum(Discharge)*1.98347)
+TulalipDischarge$WaterYear <- as.numeric(as.character(TulalipDischarge$WaterYear))
+TulalipENSO<-left_join(TulalipProccessed, enso_processed)
+
+#Skokomish
 SkokomishDischarge <- readNWISdv(siteNumbers = "12061500",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
 
+names(SkokomishDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(SkokomishDischarge, "variableInfo")
+attr(SkokomishDischarge, "siteInfo")
 
+SkokomishProccessed <- SkokomishDischarge %>%
+  mutate(Baseflow = baseflow(Discharge), 
+         Stormflow = Discharge - Baseflow,
+         Year = year(Date), 
+         WaterYear = water_year(Date),
+         Year = year(Date),
+         Month = month(Date),
+         Discharge_acftmo = sum(Discharge)*1.98347)
+SkokomishDischarge$WaterYear <- as.numeric(as.character(SkokomishDischarge$WaterYear))
+SkokomishENSO<-left_join(SkokomishProccessed, enso_processed)
+
+#Duckabush
 DuckabushDischarge <- readNWISdv(siteNumbers = "12054000",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
+names(DuckabushDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(DuckabushDischarge, "variableInfo")
+attr(DuckabushDischarge, "siteInfo")
 
+DuckProccessed <- DuckabushDischarge %>%
+  mutate(Baseflow = baseflow(Discharge), 
+         Stormflow = Discharge - Baseflow,
+         Year = year(Date), 
+         WaterYear = water_year(Date),
+         Year = year(Date),
+         Month = month(Date),
+         Discharge_acftmo = sum(Discharge)*1.98347)#%>%
+  #group_by(Year, Month) %>%
+  #summarise(Discharge_acftmo = sum(Discharge)*1.98347)
+DuckabushDischarge$WaterYear <- as.numeric(as.character(DuckabushDischarge$WaterYear))
+DuckabushENSO<-left_join(DuckProccessed, enso_processed)
+#Puyallup
 PuyallupDischarge <- readNWISdv(siteNumbers = "12101500",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
 
-names(DuckabushDischarge)[4:5] <- c("Discharge", "Approval.Code")
 names(PuyallupDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(PuyallupDischarge, "variableInfo")
+attr(PuyallupDischarge, "siteInfo")
 
-attr(DuckabushDischarge, "variableInfo")
-attr(DuckabushDischarge, "siteInfo")
+PuyallupProccessed <- PuyallupDischarge %>%
+  mutate(Baseflow = baseflow(Discharge), 
+         Stormflow = Discharge - Baseflow,
+         Year = year(Date), 
+         WaterYear = water_year(Date),
+         Year = year(Date),
+         Month = month(Date),
+         Discharge_acftmo = sum(Discharge)*1.98347)
+PuyallupDischarge$WaterYear <- as.numeric(as.character(PuyallupDischarge$WaterYear))
+PuyallupENSO<-left_join(PuyallupProccessed, enso_processed)
   
 ggplot(DuckabushDischarge, aes(x = Date, y = Discharge)) +
   geom_line() +
   labs(x = "Year", y = "Discharge (cfs)")
-  
-attr(PuyallupDischarge, "variableInfo")
-attr(PuyallupDischarge, "siteInfo")
   
 ggplot(PuyallupDischarge, aes(x = Date, y = Discharge)) +
   geom_line() +
@@ -80,24 +133,8 @@ enso_processed<-enso%>%
 #El Nino events should create a warmer, drier climate in Washington while La Nina will create a cooler, wetter environment. 
 
 
-DuckProccessed <- DuckabushDischarge %>%
-  mutate(Baseflow = baseflow(Discharge), 
-         Stormflow = Discharge - Baseflow,
-         Year = year(Date), 
-         WaterYear = water_year(Date),
-         Year = year(Date),
-         Month = month(Date),
-         Discharge_acftmo = sum(Discharge)*1.98347)#%>%
-  #group_by(Year, Month) %>%
-  #summarise(Discharge_acftmo = sum(Discharge)*1.98347)
-DuckabushDischarge$WaterYear <- as.numeric(as.character(DuckabushDischarge$WaterYear))
-
 # generate total monthly discharge
-Duckabush_proccessed_monthly <- DuckabushDischarge %>%
-  group_by(Year, Month,Date)%>%
-  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
 
-DuckabushDisSST<-left_join(Duckabush_proccessed_monthly, enso_processed)
 DuckabushENSO<- DuckabushDisSST %>%
   select(Date,Month, Year, Discharge_acftmo, SST, season.class)%>%
   filter(Year>1999)
@@ -155,23 +192,6 @@ ggplot(DuckENSODis, aes(x=Date,y=Discharge, color=season.class))+
 
 ```{r}
 
-PuyallupDischarge <- PuyallupDischarge %>%
-  mutate(Baseflow_lfstat = baseflow(Discharge), 
-         Stormflow_lfstat = Discharge - Baseflow_lfstat,
-         Year = year(Date), 
-         WaterYear = water_year(Date),
-         Year = year(Date),
-         Month = month(Date))%>%
-  group_by(Year, Month) %>%
-  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
-PuyallupDischarge$WaterYear <- as.numeric(as.character(PuyallupDischarge$WaterYear))
-
-# generate total monthly discharge
-Puyallup_proccessed_monthly <- PuyallupDischarge %>%
-  group_by(Year, Month) %>%
-  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
-
-PuyallupDisSST<-left_join(Puyallup_proccessed_monthly, enso_processed)
 PuyallupENSO<- PuyallupDisSST %>%
   select(Month, Year, Discharge_acftmo, SST,season.class)%>%
   filter(Year>1999)
