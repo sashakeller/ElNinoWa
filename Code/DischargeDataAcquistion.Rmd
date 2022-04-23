@@ -144,6 +144,7 @@ ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
 
 ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point() +
+  geom_smooth()+
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
@@ -160,11 +161,6 @@ ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
 #El Nino events should create a warmer, drier climate in Washington while La Nina will create a cooler, wetter environment. 
 
 
-# generate total monthly discharge
-
-#DuckabushMonthlyDis<- DuckabushENSO %>%
- # select(Month, Year,Date, Discharge_acftmo, season.class)
-
 DuckLa<- DuckabushENSO %>%
   filter(season.class%in% c("La Niña",  "Neutral"))
 DuckEl<-DuckabushENSO %>%
@@ -175,7 +171,6 @@ DuckEx<-DuckabushENSO %>%
 
 #Is there  a significant difference in monthly discharges between season classes?
 kruskal.test(Discharge_acftmo ~ season.class, data = DuckabushENSO)
-kruskal.test(Discharge_acftmo ~ season.class, data=DuckEx)
 #Are the classes distinct?
 kruskal.test(Discharge_acftmo ~ season.class, data=DuckabushENSO)
 #Is stormflow different between Neutral and El Nino?
@@ -198,7 +193,6 @@ ggplot(DuckabushENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
 
 #How about daily discharge?
 kruskal.test(Discharge ~ season.class, data = DuckabushENSO)
-kruskal.test(Discharge ~ season.class, data=DuckEx)
 #Are the classes distinct?
 kruskal.test(Discharge ~ season.class, data=DuckabushENSO)
 #Is stormflow different between Neutral and El Nino?
@@ -209,7 +203,7 @@ wilcox.test(Discharge ~ season.class, data=DuckLa)
 wilcox.test(Discharge ~ season.class, data=DuckEx)
 
 ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
-  geom_point() +
+  geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
@@ -217,64 +211,200 @@ ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
   ggtitle("Duckabush Daily Discharge")
 
  #What about during the largest precipitation events?
-kruskal.test(Stormflow ~ season.class, data=DuckabushENSO)
+DuckStormKT<-kruskal.test(Stormflow ~ season.class, data=DuckabushENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Stormflow ~ season.class, data=DuckEl)
+DuckStormWEl<-wilcox.test(Stormflow ~ season.class, data=DuckEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Stormflow ~ season.class, data=DuckLa)
+DuckStormWLa<-wilcox.test(Stormflow ~ season.class, data=DuckLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Stormflow ~ season.class, data=DuckEx)
+DuckStormWEx<-wilcox.test(Stormflow ~ season.class, data=DuckEx)
 ```
 
-```{r}
+```{r, Puyallup}
 
-PuyallupENSO<- PuyallupDisSST %>%
-  select(Month, Year, Discharge_acftmo, SST,season.class)%>%
-  filter(Year>1999)
-
-PuyallupEl<- PuyallupENSO %>%
-  filter(season.class=="El_Nino")
 PuyallupLa<- PuyallupENSO %>%
-  filter(season.class=="La Niña")
+  filter(season.class%in% c("La Niña",  "Neutral"))
+PuyallupEl<-PuyallupENSO %>%
+  filter(season.class%in% c("Neutral",  "El Niño"))
 PuyallupEx<-PuyallupENSO %>%
   filter(season.class %in% c("La Niña",  "El Niño"))
-PuyallupNeu<-PuyallupENSO %>%
-  filter(season.class=="Neutral")
 
+
+#Is there  a significant difference in monthly discharges between season classes?
 kruskal.test(Discharge_acftmo ~ season.class, data = PuyallupENSO)
-kruskal.test(Discharge_acftmo ~ season.class, data=PuyallupEx)
+#Are the classes distinct?
+kruskal.test(Discharge_acftmo ~ season.class, data=PuyallupENSO)
+#Is stormflow different between Neutral and El Nino?
+wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEl)
+#Is stormflow different between Neutral and La Nina?
+wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupLa)
+#Is stormflow different between La Nina and El Nino?
+wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEx)
 
+ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Monthly Discharge")
+
+
+
+#How about daily discharge?
+kruskal.test(Discharge ~ season.class, data = PuyallupENSO)
+#Are the classes distinct?
+kruskal.test(Discharge ~ season.class, data=PuyallupENSO)
+#Is stormflow different between Neutral and El Nino?
+wilcox.test(Discharge ~ season.class, data=PuyallupEl)
+#Is stormflow different between Neutral and La Nina?
+wilcox.test(Discharge ~ season.class, data=PuyallupLa)
+#Is stormflow different between La Nina and El Nino?
+wilcox.test(Discharge ~ season.class, data=PuyallupEx)
+
+ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Daily Discharge")
+
+ #What about during the largest precipitation events?
+PuyallupStormKT<-kruskal.test(Stormflow ~ season.class, data=PuyallupENSO)
+#Is stormflow different between Neutral and El Nino?
+PuyallupStormWEl<-wilcox.test(Stormflow ~ season.class, data=PuyallupEl)
+#Is stormflow different between Neutral and La Nina?
+PuyallupStormWLa<-wilcox.test(Stormflow ~ season.class, data=PuyallupLa)
+#Is stormflow different between La Nina and El Nino?
+PuyallupStormWEx<-wilcox.test(Stormflow ~ season.class, data=PuyallupEx)
 
 
 ```
 
-```{r, stormflow}
+```{r, Skokomish}
 
 
-ggplot(DuckabushDischarge, aes(x=Date, y=Baseflow))+
-  geom_line(aes(y=Stormflow), color="white")+
-  geom_line(aes(y=Baseflow))
+SkokomishLa<- SkokomishENSO %>%
+  filter(season.class%in% c("La Niña",  "Neutral"))
+SkokomishEl<-SkokomishENSO %>%
+  filter(season.class%in% c("Neutral",  "El Niño"))
+SkokomishEx<-SkokomishENSO %>%
+  filter(season.class %in% c("La Niña",  "El Niño"))
 
-DuckabushStorm<- DuckProccessed %>%
-  left_join(enso_processed)%>%
-  filter(Year>1999)%>%
-  select(Date,Stormflow,season.class)
 
-DSEN<-DuckabushStorm%>%
-  filter(season.class %in% c("El_Nino","Neutral"))
-DSLN<-DuckabushStorm%>%
-  filter(season.class %in% c("La_Nina","Neutral"))
-DSEL<-DuckabushStorm%>%
-  filter(season.class %in% c("La_Nina","El_Nino"))
-
+#Is there  a significant difference in monthly discharges between season classes?
+kruskal.test(Discharge_acftmo ~ season.class, data = SkokomishENSO)
 #Are the classes distinct?
-kruskal.test(Stormflow ~ season.class, data=DuckabushStorm)
+kruskal.test(Discharge_acftmo ~ season.class, data=SkokomishENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Stormflow ~ season.class, data=DSEN)
+wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Stormflow ~ season.class, data=DSEN)
+wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Stormflow ~ season.class, data=DSEL)
+wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEx)
+
+ggplot(SkokomishENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Monthly Discharge")
+
+
+
+#How about daily discharge?
+kruskal.test(Discharge ~ season.class, data = SkokomishENSO) 
+#Are the classes distinct?
+kruskal.test(Discharge ~ season.class, data=SkokomishENSO)
+#Is stormflow different between Neutral and El Nino?
+wilcox.test(Discharge ~ season.class, data=SkokomishEl)
+#Is stormflow different between Neutral and La Nina?
+wilcox.test(Discharge ~ season.class, data=SkokomishLa)
+#Is stormflow different between La Nina and El Nino?
+wilcox.test(Discharge ~ season.class, data=SkokomishEx)
+
+ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Daily Discharge")
+
+ #What about during the largest precipitation events?
+SkokomishStormKT<-kruskal.test(Stormflow ~ season.class, data=SkokomishENSO)
+#Is stormflow different between Neutral and El Nino?
+SkokomishStormWEl<-wilcox.test(Stormflow ~ season.class, data=SkokomishEl)
+#Is stormflow different between Neutral and La Nina?
+SkokomishStormWLa<-wilcox.test(Stormflow ~ season.class, data=SkokomishLa)
+#Is stormflow different between La Nina and El Nino?
+SkokomishStormWEx<-wilcox.test(Stormflow ~ season.class, data=SkokomishEx)
+```
+
+```{r, Tulalip}
+TulalipLa<- TulalipENSO %>%
+  filter(season.class%in% c("La Niña",  "Neutral"))
+TulalipEl<-TulalipENSO %>%
+  filter(season.class%in% c("Neutral",  "El Niño"))
+TulalipEx<-TulalipENSO %>%
+  filter(season.class %in% c("La Niña",  "El Niño"))
+
+
+#Is there  a significant difference in monthly discharges between season classes?
+kruskal.test(Discharge_acftmo ~ season.class, data = TulalipENSO)
+#Are the classes distinct?
+kruskal.test(Discharge_acftmo ~ season.class, data=TulalipENSO)
+#Is stormflow different between Neutral and El Nino?
+wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEl)
+#Is stormflow different between Neutral and La Nina?
+wilcox.test(Discharge_acftmo ~ season.class, data=TulalipLa)
+#Is stormflow different between La Nina and El Nino?
+wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEx)
+
+ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Monthly Discharge")
+
+
+
+#How about daily discharge?
+kruskal.test(Discharge ~ season.class, data = TulalipENSO)
+#Are the classes distinct?
+kruskal.test(Discharge ~ season.class, data=TulalipENSO)
+#Is stormflow different between Neutral and El Nino?
+wilcox.test(Discharge ~ season.class, data=TulalipEl)
+#Is stormflow different between Neutral and La Nina?
+wilcox.test(Discharge ~ season.class, data=TulalipLa)
+#Is stormflow different between La Nina and El Nino?
+wilcox.test(Discharge ~ season.class, data=TulalipEx)
+
+ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Daily Discharge")
+
+ #What about during the largest precipitation events?
+TulalipStormKT<-kruskal.test(Stormflow ~ season.class, data=TulalipENSO)
+#Is stormflow different between Neutral and El Nino?
+TulalipStormWEl<-wilcox.test(Stormflow ~ season.class, data=TulalipEl)
+#Is stormflow different between Neutral and La Nina?
+TulalipStormWLa<-wilcox.test(Stormflow ~ season.class, data=TulalipLa)
+#Is stormflow different between La Nina and El Nino?
+TulalipStormWEx<-wilcox.test(Stormflow ~ season.class, data=TulalipEx)
+
+
 ```
 
 Questions: 
@@ -301,6 +431,13 @@ Can I just recode El Nino/La Nina/Neither as 1,2,3 and run a t test frequency = 
 
 
 
+
+#TO DO
+- Put stat tests into variables, put variables into table
+- Make a smaller time frame discharge plot to show variance in season?
+- Put all ggplots together somehow
+- save datasets as objects, so I can put the plot code in another file
+- Finish write up
 
 
 

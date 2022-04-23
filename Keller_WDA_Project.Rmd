@@ -41,13 +41,13 @@ As we go out into a new world racked with climate change, we will encounter shif
 \newpage
 
 # Dataset Information
-
+Two data sources were required to address the research questions: discharge data and ENSO data indicating when El Niño and La Niña cycles were in effect. Discharge data was sourced from USGS Gage data through the dataRetrieval package. ENSO status was sourced from NOAA and processed through a script graciously provided by Dr. Luke Parsons. ENSO data is measured in Sea Surface Temperature (SST) in degrees Celsius. Any months with SST above 0.5°C were marked as under an El Niño cycle and all months below -0.5°C were marked as under a La Niña cycle, as per NOAA convention. 
 
 
 \newpage
 
 # Exploratory Analysis 
-
+Visual inspection of discharge data, ENSO cycles, and their overlap informed my approach to statistical tests and data wrangling. As is immediately evident in Figure 1, ENSO cycles are not very evenly distributed. These classifications 
 
 
 \newpage
@@ -56,9 +56,9 @@ As we go out into a new world racked with climate change, we will encounter shif
 
 
 
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+## Question 1: Do El Nino/La Nina cycles affect discharge around Seattle?
 
-## Question 2: 
+## Question 2: What is the resolution of the effects?
 
 
 
