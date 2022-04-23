@@ -3,6 +3,8 @@ title: "Discharge Data"
 author: "Sasha Keller"
 date: "4/12/2022"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -19,6 +21,7 @@ library(dataRetrieval)
 library(lubridate)
 library(lfstat)
 library(trend)
+library(gt)
 # Set your ggplot theme
 theme_set(theme_classic())
 # Load your datasets
@@ -51,32 +54,48 @@ TulalipProccessed <- TulalipDischarge %>%
          Stormflow = Discharge - Baseflow,
          Year = year(Date), 
          Year = year(Date),
-         Month = month(Date),
-         Discharge_acftmo = sum(Discharge)*1.98347)
+         Month = month(Date))
 TulalipENSO<-TulalipProccessed%>%
     filter(Year>1999)%>%
   left_join(enso_processed)
 
-#Skokomish
-SkokomishDischarge <- readNWISdv(siteNumbers = "12061500",
+TulalipMonthly<- TulalipProccessed%>%
+  group_by(Year, Month) %>%
+  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
+
+TulalipENSO<-TulalipProccessed%>%
+    filter(Year>1999)%>%
+  left_join(enso_processed)%>%
+  left_join(TulalipMonthly)
+
+#Puyallup
+PuyallupDischarge <- readNWISdv(siteNumbers = "12061500",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
 
-names(SkokomishDischarge)[4:5] <- c("Discharge", "Approval.Code")
-attr(SkokomishDischarge, "variableInfo")
-attr(SkokomishDischarge, "siteInfo")
+names(PuyallupDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(PuyallupDischarge, "variableInfo")
+attr(PuyallupDischarge, "siteInfo")
 
-SkokomishProccessed <- SkokomishDischarge %>%
+PuyallupProccessed <- PuyallupDischarge %>%
   mutate(Baseflow = baseflow(Discharge), 
          Stormflow = Discharge - Baseflow,
          Year = year(Date), 
          Year = year(Date),
          Month = month(Date),
          Discharge_acftmo = sum(Discharge)*1.98347)
-SkokomishENSO<-SkokomishProccessed%>%
+PuyallupENSO<-PuyallupProccessed%>%
   filter(Year>1999)%>%
   left_join(enso_processed)
+
+PuyallupMonthly<- PuyallupProccessed%>%
+  group_by(Year, Month) %>%
+  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
+
+PuyallupENSO<-PuyallupProccessed%>%
+    filter(Year>1999)%>%
+  left_join(PuyallupMonthly)
 
 #Duckabush
 DuckabushDischarge <- readNWISdv(siteNumbers = "12054000",
@@ -103,27 +122,34 @@ DuckabushENSO<-DuckProccessed%>%
   left_join(enso_processed)%>%
   left_join(DuckMonthly)
 
-#Puyallup
-PuyallupDischarge <- readNWISdv(siteNumbers = "12101500",
+#Skokomish
+SkokomishDischarge <- readNWISdv(siteNumbers = "12101500",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "1974-10-01", 
                      endDate = "2021-09-30")
 
-names(PuyallupDischarge)[4:5] <- c("Discharge", "Approval.Code")
-attr(PuyallupDischarge, "variableInfo")
-attr(PuyallupDischarge, "siteInfo")
+names(SkokomishDischarge)[4:5] <- c("Discharge", "Approval.Code")
+attr(SkokomishDischarge, "variableInfo")
+attr(SkokomishDischarge, "siteInfo")
 
-PuyallupProccessed <- PuyallupDischarge %>%
+SkokomishProccessed <- SkokomishDischarge %>%
   mutate(Baseflow = baseflow(Discharge), 
          Stormflow = Discharge - Baseflow,
          Year = year(Date), 
          Year = year(Date),
-         Month = month(Date),
-         Discharge_acftmo = sum(Discharge)*1.98347)
-PuyallupENSO<-PuyallupProccessed%>%
+         Month = month(Date))
+SkokomishENSO<-SkokomishProccessed%>%
     filter(Year>1999)%>%
   left_join(enso_processed)
-  
+
+SkokomishMonthly<- SkokomishProccessed%>%
+  group_by(Year, Month) %>%
+  summarise(Discharge_acftmo = sum(Discharge)*1.98347)
+
+SkokomishENSO<-SkokomishProccessed%>%
+    filter(Year>1999)%>%
+  left_join(enso_processed)%>%
+  left_join(SkokomishMonthly)
 
   
 ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
@@ -170,15 +196,13 @@ DuckEx<-DuckabushENSO %>%
 
 
 #Is there  a significant difference in monthly discharges between season classes?
-kruskal.test(Discharge_acftmo ~ season.class, data = DuckabushENSO)
-#Are the classes distinct?
-kruskal.test(Discharge_acftmo ~ season.class, data=DuckabushENSO)
+DuckKTMonthly<-kruskal.test(Discharge_acftmo ~ season.class, data = DuckabushENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=DuckEl)
+DuckWTMEl<-wilcox.test(Discharge_acftmo ~ season.class, data=DuckEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge_acftmo ~ season.class, data=DuckLa)
+DuckWTMLa<-wilcox.test(Discharge_acftmo ~ season.class, data=DuckLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=DuckEx)
+DuckWTMEx<-wilcox.test(Discharge_acftmo ~ season.class, data=DuckEx)
 
 ggplot(DuckabushENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
@@ -192,15 +216,13 @@ ggplot(DuckabushENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
 
 
 #How about daily discharge?
-kruskal.test(Discharge ~ season.class, data = DuckabushENSO)
-#Are the classes distinct?
-kruskal.test(Discharge ~ season.class, data=DuckabushENSO)
+DuckKTDaily<-kruskal.test(Discharge ~ season.class, data = DuckabushENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge ~ season.class, data=DuckEl)
+DuckWTDEl<-wilcox.test(Discharge ~ season.class, data=DuckEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge ~ season.class, data=DuckLa)
+DuckWTDLa<-wilcox.test(Discharge ~ season.class, data=DuckLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge ~ season.class, data=DuckEx)
+DuckWTDEx<-wilcox.test(Discharge ~ season.class, data=DuckEx)
 
 ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
@@ -218,6 +240,20 @@ DuckStormWEl<-wilcox.test(Stormflow ~ season.class, data=DuckEl)
 DuckStormWLa<-wilcox.test(Stormflow ~ season.class, data=DuckLa)
 #Is stormflow different between La Nina and El Nino?
 DuckStormWEx<-wilcox.test(Stormflow ~ season.class, data=DuckEx)
+
+DuckMonthlyStats<-data.frame(
+  DuckWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(DuckWTMEl$p.value, DuckWTMLa$p.value, DuckWTMEx$p.value))
+
+DuckDailyStats<-data.frame(
+  DuckWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(DuckWTDEl$p.value, DuckWTDLa$p.value, DuckWTDEx$p.value))
+
+DuckStormStats<-data.frame(
+  DuckWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(DuckStormWEl$p.value, DuckStormWLa$p.value, DuckStormWEx$p.value))
+
+
 ```
 
 ```{r, Puyallup}
@@ -231,15 +267,13 @@ PuyallupEx<-PuyallupENSO %>%
 
 
 #Is there  a significant difference in monthly discharges between season classes?
-kruskal.test(Discharge_acftmo ~ season.class, data = PuyallupENSO)
-#Are the classes distinct?
-kruskal.test(Discharge_acftmo ~ season.class, data=PuyallupENSO)
+PuyallupKTMonthly<-kruskal.test(Discharge_acftmo ~ season.class, data = PuyallupENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEl)
+PuyallupWTMEl<-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupLa)
+PuyallupWTMLa<-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEx)
+PuyallupWTMEx<-wilcox.test(Discharge_acftmo ~ season.class, data=PuyallupEx)
 
 ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
@@ -248,20 +282,18 @@ ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
                                   "Neutral"="#7fcdbb"))+
   scale_y_log10()+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Monthly Discharge")
+  ggtitle("Puyallup Monthly Discharge")
 
 
 
 #How about daily discharge?
-kruskal.test(Discharge ~ season.class, data = PuyallupENSO)
-#Are the classes distinct?
-kruskal.test(Discharge ~ season.class, data=PuyallupENSO)
+PuyallupKTDaily<-kruskal.test(Discharge ~ season.class, data = PuyallupENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge ~ season.class, data=PuyallupEl)
+PuyallupWTDEl<-wilcox.test(Discharge ~ season.class, data=PuyallupEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge ~ season.class, data=PuyallupLa)
+PuyallupWTDLa<-wilcox.test(Discharge ~ season.class, data=PuyallupLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge ~ season.class, data=PuyallupEx)
+PuyallupWTDEx<-wilcox.test(Discharge ~ season.class, data=PuyallupEx)
 
 ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
@@ -269,7 +301,7 @@ ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Daily Discharge")
+  ggtitle("Puyallup Daily Discharge")
 
  #What about during the largest precipitation events?
 PuyallupStormKT<-kruskal.test(Stormflow ~ season.class, data=PuyallupENSO)
@@ -280,12 +312,21 @@ PuyallupStormWLa<-wilcox.test(Stormflow ~ season.class, data=PuyallupLa)
 #Is stormflow different between La Nina and El Nino?
 PuyallupStormWEx<-wilcox.test(Stormflow ~ season.class, data=PuyallupEx)
 
+PuyallupMonthlyStats<-data.frame(
+  PuyallupWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(PuyallupWTMEl$p.value, PuyallupWTMLa$p.value, PuyallupWTMEx$p.value))
+
+PuyallupDailyStats<-data.frame(
+  PuyallupWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(PuyallupWTDEl$p.value, PuyallupWTDLa$p.value, PuyallupWTDEx$p.value))
+
+PuyallupStormStats<-data.frame(
+  PuyallupWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(PuyallupStormWEl$p.value, PuyallupStormWLa$p.value, PuyallupStormWEx$p.value))
 
 ```
 
 ```{r, Skokomish}
-
-
 SkokomishLa<- SkokomishENSO %>%
   filter(season.class%in% c("La Niña",  "Neutral"))
 SkokomishEl<-SkokomishENSO %>%
@@ -295,15 +336,13 @@ SkokomishEx<-SkokomishENSO %>%
 
 
 #Is there  a significant difference in monthly discharges between season classes?
-kruskal.test(Discharge_acftmo ~ season.class, data = SkokomishENSO)
-#Are the classes distinct?
-kruskal.test(Discharge_acftmo ~ season.class, data=SkokomishENSO)
+SkokomishKTMonthly<-kruskal.test(Discharge_acftmo ~ season.class, data = SkokomishENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEl)
+SkokomishWTMEl<-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishLa)
+SkokomishWTMLa<-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEx)
+SkokomishWTMEx<-wilcox.test(Discharge_acftmo ~ season.class, data=SkokomishEx)
 
 ggplot(SkokomishENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
@@ -312,20 +351,18 @@ ggplot(SkokomishENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
                                   "Neutral"="#7fcdbb"))+
   scale_y_log10()+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Monthly Discharge")
+  ggtitle("Skokomish Monthly Discharge")
 
 
 
 #How about daily discharge?
-kruskal.test(Discharge ~ season.class, data = SkokomishENSO) 
-#Are the classes distinct?
-kruskal.test(Discharge ~ season.class, data=SkokomishENSO)
+SkokomishKTDaily<-kruskal.test(Discharge ~ season.class, data = SkokomishENSO) 
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge ~ season.class, data=SkokomishEl)
+SkokomishWTDEl<-wilcox.test(Discharge ~ season.class, data=SkokomishEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge ~ season.class, data=SkokomishLa)
+SkokomishWTDLa<-wilcox.test(Discharge ~ season.class, data=SkokomishLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge ~ season.class, data=SkokomishEx)
+SkokomishWTDEx<-wilcox.test(Discharge ~ season.class, data=SkokomishEx)
 
 ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
@@ -333,16 +370,29 @@ ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Daily Discharge")
+  ggtitle("Skokomish Daily Discharge")
 
  #What about during the largest precipitation events?
 SkokomishStormKT<-kruskal.test(Stormflow ~ season.class, data=SkokomishENSO)
 #Is stormflow different between Neutral and El Nino?
-SkokomishStormWEl<-wilcox.test(Stormflow ~ season.class, data=SkokomishEl)
+SkokomishStormWTEl<-wilcox.test(Stormflow ~ season.class, data=SkokomishEl)
 #Is stormflow different between Neutral and La Nina?
-SkokomishStormWLa<-wilcox.test(Stormflow ~ season.class, data=SkokomishLa)
+SkokomishStormWTLa<-wilcox.test(Stormflow ~ season.class, data=SkokomishLa)
 #Is stormflow different between La Nina and El Nino?
-SkokomishStormWEx<-wilcox.test(Stormflow ~ season.class, data=SkokomishEx)
+SkokomishStormWTEx<-wilcox.test(Stormflow ~ season.class, data=SkokomishEx)
+
+SkokomishMonthlyStats<-data.frame(
+  SkokomishWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(SkokomishWTMEl$p.value, SkokomishWTMLa$p.value, SkokomishWTMEx$p.value))
+
+SkokomishDailyStats<-data.frame(
+  SkokomishWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(SkokomishWTDEl$p.value, SkokomishWTDLa$p.value, SkokomishWTDEx$p.value))
+
+SkokomishStormStats<-data.frame(
+  SkokomishWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(SkokomishStormWTEl$p.value, SkokomishStormWTLa$p.value, SkokomishStormWTEx$p.value))
+
 ```
 
 ```{r, Tulalip}
@@ -355,15 +405,13 @@ TulalipEx<-TulalipENSO %>%
 
 
 #Is there  a significant difference in monthly discharges between season classes?
-kruskal.test(Discharge_acftmo ~ season.class, data = TulalipENSO)
-#Are the classes distinct?
-kruskal.test(Discharge_acftmo ~ season.class, data=TulalipENSO)
+TulalipKTMonthly<-kruskal.test(Discharge_acftmo ~ season.class, data = TulalipENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEl)
+TulalipWTMEl<-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipLa)
+TulalipWTMLa<-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEx)
+TulalipWTMEx<-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEx)
 
 ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
@@ -372,20 +420,18 @@ ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
                                   "Neutral"="#7fcdbb"))+
   scale_y_log10()+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Monthly Discharge")
+  ggtitle("Tulalip Monthly Discharge")
 
 
 
 #How about daily discharge?
-kruskal.test(Discharge ~ season.class, data = TulalipENSO)
-#Are the classes distinct?
-kruskal.test(Discharge ~ season.class, data=TulalipENSO)
+TulalipKTDaily<-kruskal.test(Discharge ~ season.class, data = TulalipENSO)
 #Is stormflow different between Neutral and El Nino?
-wilcox.test(Discharge ~ season.class, data=TulalipEl)
+TulalipWTDEl<-wilcox.test(Discharge ~ season.class, data=TulalipEl)
 #Is stormflow different between Neutral and La Nina?
-wilcox.test(Discharge ~ season.class, data=TulalipLa)
+TulalipWTDLa<-wilcox.test(Discharge ~ season.class, data=TulalipLa)
 #Is stormflow different between La Nina and El Nino?
-wilcox.test(Discharge ~ season.class, data=TulalipEx)
+TulalipWTDEx<-wilcox.test(Discharge ~ season.class, data=TulalipEx)
 
 ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
@@ -393,18 +439,192 @@ ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
   labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Duckabush Daily Discharge")
+  ggtitle("Tulalip Daily Discharge")
 
  #What about during the largest precipitation events?
 TulalipStormKT<-kruskal.test(Stormflow ~ season.class, data=TulalipENSO)
 #Is stormflow different between Neutral and El Nino?
-TulalipStormWEl<-wilcox.test(Stormflow ~ season.class, data=TulalipEl)
+TulalipStormWTEl<-wilcox.test(Stormflow ~ season.class, data=TulalipEl)
 #Is stormflow different between Neutral and La Nina?
-TulalipStormWLa<-wilcox.test(Stormflow ~ season.class, data=TulalipLa)
+TulalipStormWTLa<-wilcox.test(Stormflow ~ season.class, data=TulalipLa)
 #Is stormflow different between La Nina and El Nino?
-TulalipStormWEx<-wilcox.test(Stormflow ~ season.class, data=TulalipEx)
+TulalipStormWTEx<-wilcox.test(Stormflow ~ season.class, data=TulalipEx)
+
+TulalipMonthlyStats<-data.frame(
+  TulalipWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(TulalipWTMEl$p.value, TulalipWTMLa$p.value, TulalipWTMEx$p.value))
+
+TulalipDailyStats<-data.frame(
+  TulalipWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(TulalipWTDEl$p.value, TulalipWTDLa$p.value, TulalipWTDEx$p.value))
+
+TulalipStormStats<-data.frame(
+  TulalipWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
+  pValue= c(TulalipStormWTEl$p.value, TulalipStormWTLa$p.value, TulalipStormWTEx$p.value))
+```
+```{r}
+
+KTMonthly<-data.frame(
+  StreamName=c("Duckabush","Skokomish","Puyallup","Tulalip"),
+               pValue=c(DuckKTMonthly$p.value, SkokomishKTMonthly$p.value,PuyallupKTMonthly$p.value,TulalipKTMonthly$p.value))
+
+KTtable<-KTMonthly%>%
+  gt()%>%
+  tab_header(title = md("**Kruskal-Wallis Rank Sum Results**"))%>%
+  cols_label(
+    StreamName = md("**Stream**"),
+    pValue = md("**p Value**"))
+KTtable
+```
 
 
+```{r, Puyallup}
+#Base tables
+table1 = PuyallupMonthlyStats
+
+table2 = PuyallupDailyStats
+
+table3=PuyallupStormStats
+
+#If the individual tables are a GT object already, exact the data
+#gtTable = gt(table1)
+#table1 = gtTable$`_data`
+
+
+#Merge tables by row
+fullTable = rbind(table1, table2,table3)
+fullTable
+
+PuyallupgtTable = gt(fullTable) %>%
+  tab_header(title = md("**Puyallup Wilcoxon Rank Sum Results**"))%>%
+  cols_label(
+    PuyallupWilcoxonTests =  md("**Seasons Compared**"),
+    pValue =  md("**p Value**"))%>%
+  tab_row_group(
+    group = "Monthly Discharge",
+    rows = 1:3
+  ) %>% 
+  tab_row_group(
+    group = "Daily Discharge",
+    rows = 4:6
+  )%>% 
+  tab_row_group(
+    group = "Storm Event Discharge",
+    rows = 7:9
+  )
+
+PuyallupgtTable
+```
+```{r, Duck}
+#Base tables
+table1 = DuckMonthlyStats
+
+table2 = DuckDailyStats
+
+table3=DuckStormStats
+
+#If the individual tables are a GT object already, exact the data
+#gtTable = gt(table1)
+#table1 = gtTable$`_data`
+
+
+#Merge tables by row
+fullTable = rbind(table1, table2,table3)
+fullTable
+
+DuckgtTable = gt(fullTable) %>%
+  tab_header(title = md("**Duckabush Wilcoxon Rank Sum Results**"))%>%
+  cols_label(
+    DuckWilcoxonTests = md("**Seasons Compared**"),
+    pValue = md("**p Value**"))%>%
+  tab_row_group(
+    group = "Monthly Discharge",
+    rows = 1:3
+  ) %>% 
+  tab_row_group(
+    group = "Daily Discharge",
+    rows = 4:6
+  )%>% 
+  tab_row_group(
+    group = "Storm Event Discharge",
+    rows = 7:9
+  )
+
+DuckgtTable
+```
+```{r, Tulalip}
+#Base tables
+table1 = TulalipMonthlyStats
+
+table2 = TulalipDailyStats
+
+table3=TulalipStormStats
+
+#If the individual tables are a GT object already, exact the data
+#gtTable = gt(table1)
+#table1 = gtTable$`_data`
+
+
+#Merge tables by row
+fullTable = rbind(table1, table2,table3)
+fullTable
+
+TulalipgtTable = gt(fullTable) %>%
+  tab_header(title = md("**Tulalip Wilcoxon Rank Sum Results**"))%>%
+  cols_label(
+    TulalipWilcoxonTests = md("**Seasons Compared**"),
+    pValue = md("**p Value**"))%>%
+  tab_row_group(
+    group = "Monthly Discharge",
+    rows = 1:3
+  ) %>% 
+  tab_row_group(
+    group = "Daily Discharge",
+    rows = 4:6
+  )%>% 
+  tab_row_group(
+    group = "Storm Event Discharge",
+    rows = 7:9
+  )
+
+TulalipgtTable
+```
+```{r,Skokomish}
+#Base tables
+table1 = SkokomishMonthlyStats
+
+table2 = SkokomishDailyStats
+
+table3=SkokomishStormStats
+
+#If the individual tables are a GT object already, exact the data
+#gtTable = gt(table1)
+#table1 = gtTable$`_data`
+
+
+#Merge tables by row
+fullTable = rbind(table1, table2,table3)
+fullTable
+
+SkokomishgtTable = gt(fullTable) %>%
+  tab_header(title = md("**Skokomish Wilcoxon Rank Sum Results**"))%>%
+  cols_label(
+    SkokomishWilcoxonTests = md("**Seasons Compared**"),
+    pValue = md("**p Value**"))%>%
+  tab_row_group(
+    group = "Monthly Discharge",
+    rows = 1:3
+  ) %>% 
+  tab_row_group(
+    group = "Daily Discharge",
+    rows = 4:6
+  )%>% 
+  tab_row_group(
+    group = "Storm Event Discharge",
+    rows = 7:9
+  )
+
+SkokomishgtTable
 ```
 
 Questions: 
