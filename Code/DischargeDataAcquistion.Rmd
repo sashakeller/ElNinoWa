@@ -83,11 +83,7 @@ PuyallupProccessed <- PuyallupDischarge %>%
          Stormflow = Discharge - Baseflow,
          Year = year(Date), 
          Year = year(Date),
-         Month = month(Date),
-         Discharge_acftmo = sum(Discharge)*1.98347)
-PuyallupENSO<-PuyallupProccessed%>%
-  filter(Year>1999)%>%
-  left_join(enso_processed)
+         Month = month(Date))
 
 PuyallupMonthly<- PuyallupProccessed%>%
   group_by(Year, Month) %>%
@@ -95,6 +91,7 @@ PuyallupMonthly<- PuyallupProccessed%>%
 
 PuyallupENSO<-PuyallupProccessed%>%
     filter(Year>1999)%>%
+  left_join(enso_processed)%>%
   left_join(PuyallupMonthly)
 
 #Duckabush
@@ -280,7 +277,6 @@ ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  scale_y_log10()+
   labs(x = "Year", y = "Discharge (cfs)")+
   ggtitle("Puyallup Monthly Discharge")
 
@@ -468,13 +464,38 @@ KTMonthly<-data.frame(
   StreamName=c("Duckabush","Skokomish","Puyallup","Tulalip"),
                pValue=c(DuckKTMonthly$p.value, SkokomishKTMonthly$p.value,PuyallupKTMonthly$p.value,TulalipKTMonthly$p.value))
 
-KTtable<-KTMonthly%>%
+KTDaily<-data.frame(
+  StreamName=c("Duckabush","Skokomish","Puyallup","Tulalip"),
+               pValue=c(DuckKTDaily$p.value, SkokomishKTDaily$p.value,PuyallupKTDaily$p.value,TulalipKTDaily$p.value))
+
+KTStorm<-data.frame(
+  StreamName=c("Duckabush","Skokomish","Puyallup","Tulalip"),
+               pValue=c(DuckStormKT$p.value, SkokomishStormKT$p.value,PuyallupStormKT$p.value,TulalipStormKT$p.value))
+
+
+KTMonthlytable<-KTMonthly%>%
   gt()%>%
-  tab_header(title = md("**Kruskal-Wallis Rank Sum Results**"))%>%
+  tab_header(title = md("**Monthly Discharge Kruskal-Wallis Rank Sum Results**"))%>%
   cols_label(
     StreamName = md("**Stream**"),
     pValue = md("**p Value**"))
-KTtable
+KTMonthlytable
+
+KTDailytable<-KTDaily%>%
+  gt()%>%
+  tab_header(title = md("**Daily Discharge Kruskal-Wallis Rank Sum Results**"))%>%
+  cols_label(
+    StreamName = md("**Stream**"),
+    pValue = md("**p Value**"))
+KTDailytable
+
+KTStormtable<-KTStorm%>%
+  gt()%>%
+  tab_header(title = md("**Storm Discharge Kruskal-Wallis Rank Sum Results**"))%>%
+  cols_label(
+    StreamName = md("**Stream**"),
+    pValue = md("**p Value**"))
+KTStormtable
 ```
 
 
@@ -626,7 +647,10 @@ SkokomishgtTable = gt(fullTable) %>%
 
 SkokomishgtTable
 ```
-
+```{r}
+saveRDS(SkokomishgtTable, PuyallupgtTable, DuckgtTable,TulalipgtTable, file="~/Data/Processed/figures.RData")
+#KTMonthlytable,KTDailytable,KTStormtable,
+```
 Questions: 
 Is 3 month seasonal mean common water format or just climate data?
 
