@@ -149,35 +149,236 @@ SkokomishENSO<-SkokomishProccessed%>%
   left_join(enso_processed)%>%
   left_join(SkokomishMonthly)
 
-  
-ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
-  geom_point() +
-    scale_color_manual(values = c("El Niño"="#feb24c",
-                                  "La Niña"="#2c7fb8",
-                                  "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Puyallup Daily Discharge")
+```
 
-ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
-  geom_point() +
-    scale_color_manual(values = c("El Niño"="#feb24c",
-                                  "La Niña"="#2c7fb8",
-                                  "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Tulalip Daily Discharge")
+```{r, summary statistics}
+Sko.long.df<-melt(SkokomishENSO, id=c("Date"))
+Sko.long.df$value<-as.numeric(Sko.long.df$value)
 
-ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
-  geom_point() +
-  geom_smooth()+
-    scale_color_manual(values = c("El Niño"="#feb24c",
-                                  "La Niña"="#2c7fb8",
-                                  "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Skokomish Daily Discharge")
+data.df<-Sko.long.df %>%
+                      filter(variable=="Discharge"|
+					            variable=="Baseflow"|
+					            variable=="Stormflow"|
+					            variable=="SST"|
+					            variable=="Discharge_acftmo")
 
+summary.Sko.df <-data.df %>% 
+  dplyr::group_by(variable) %>%
+  dplyr::summarize(
+              length.value=length(value)-sum(is.na(value)), 
+              mean.value=signif(mean(value, na.rm=TRUE),4),
+              median.value=as.numeric(median(value, na.rm=TRUE)),
+              sd.value=signif(sd(value, na.rm=TRUE),4),
+              skew.value=skewness(value, na.rm=TRUE), .groups = "keep"
+                    )
+summary.Sko.df$variable<-recode(summary.Sko.df$variable, SST="Sea Surface Temperature",
+                                       Discharge_acftmo="Monthly Discharge (Acre Feet per month)" )
+
+
+Duck.long.df<-melt(DuckabushENSO, id=c("Date"))
+Duck.long.df$value<-as.numeric(Duck.long.df$value)
+
+data.df<-Duck.long.df %>%
+                      filter(variable=="Discharge"|
+					            variable=="Baseflow"|
+					            variable=="Stormflow"|
+					            variable=="SST"|
+					            variable=="Discharge_acftmo")
+
+summary.Duck.df <-data.df %>% 
+  dplyr::group_by(variable) %>%
+  dplyr::summarize(
+              length.value=length(value)-sum(is.na(value)), 
+              mean.value=signif(mean(value, na.rm=TRUE),4),
+              median.value=as.numeric(median(value, na.rm=TRUE)),
+              sd.value=signif(sd(value, na.rm=TRUE),4),
+              skew.value=skewness(value, na.rm=TRUE), .groups = "keep"
+                    )
+summary.Duck.df$variable<-recode(summary.Duck.df$variable, SST="Sea Surface Temperature",
+                                       Discharge_acftmo="Monthly Discharge (Acre Feet per month)" )
+
+#Puyallup
+Puya.long.df<-melt(PuyallupENSO, id=c("Date"))
+Puya.long.df$value<-as.numeric(Puya.long.df$value)
+
+data.df<-Puya.long.df %>%
+                      filter(variable=="Discharge"|
+					            variable=="Baseflow"|
+					            variable=="Stormflow"|
+					            variable=="SST"|
+					            variable=="Discharge_acftmo")
+
+summary.Puya.df <-data.df %>% 
+  dplyr::group_by(variable) %>%
+  dplyr::summarize(
+              length.value=length(value)-sum(is.na(value)), 
+              mean.value=signif(mean(value, na.rm=TRUE),4),
+              median.value=as.numeric(median(value, na.rm=TRUE)),
+              sd.value=signif(sd(value, na.rm=TRUE),4),
+              skew.value=skewness(value, na.rm=TRUE), .groups = "keep"
+                    )
+summary.Puya.df$variable<-recode(summary.Puya.df$variable, SST="Sea Surface Temperature",
+                                       Discharge_acftmo="Monthly Discharge (Acre Feet per month)" )
+
+#Tulalip
+Tula.long.df<-melt(TulalipENSO, id=c("Date"))
+Tula.long.df$value<-as.numeric(Tula.long.df$value)
+
+data.df<-Tula.long.df %>%
+                      filter(variable=="Discharge"|
+					            variable=="Baseflow"|
+					            variable=="Stormflow"|
+					            variable=="SST"|
+					            variable=="Discharge_acftmo")
+
+summary.Tula.df <-data.df %>% 
+  dplyr::group_by(variable) %>%
+  dplyr::summarize(
+              length.value=length(value)-sum(is.na(value)), 
+              mean.value=signif(mean(value, na.rm=TRUE),4),
+              median.value=as.numeric(median(value, na.rm=TRUE)),
+              sd.value=signif(sd(value, na.rm=TRUE),4),
+              skew.value=skewness(value, na.rm=TRUE), .groups = "keep"
+                    )
+summary.Tula.df$variable<-recode(summary.Tula.df$variable, SST="Sea Surface Temperature",
+                                       Discharge_acftmo="Monthly Discharge (Acre Feet per month)" )
 
 ```
 
+```{r, summary statistics tables}
+#Skokomish
+summary.Sko.df %>%
+gt() %>%
+  tab_header(
+    title = md("Summary Statistics of Skokomish Stream")) %>%
+  
+  fmt_passthrough (columns=vars(variable)) %>%
+  fmt_number(columns = vars(length.value), decimals = 0) %>%
+  fmt_number(columns = vars(mean.value), decimals=0, rows=1) %>% 
+  fmt_number(columns = vars(mean.value), decimals=2, rows=1:2) %>% 
+  fmt_number(columns = vars(median.value), decimals = 2) %>%
+  fmt_number(columns = vars(sd.value), decimals = 0, rows=1) %>% 
+  fmt_number(columns = vars(sd.value), decimals = 2, rows=1:2) %>% 
+  fmt_number(columns = vars(skew.value), decimals = 2) %>%
+
+tab_source_note(
+    source_note = "Data gathered from USGS and NOAA") %>%
+
+cols_label(
+    variable="Measure",
+    length.value = "Observations",
+    mean.value = "Mean",
+    median.value = "Median",
+    sd.value = "SD",
+    skew.value = "Skewness"  )
+
+#Duckabush
+
+summary.Duck.df %>%
+gt() %>%
+  tab_header(
+    title = md("Summary Statistics of Duckabush Stream")) %>%
+  
+  fmt_passthrough (columns=vars(variable)) %>%
+  fmt_number(columns = vars(length.value), decimals = 0) %>%
+  fmt_number(columns = vars(mean.value), decimals=0, rows=1) %>% 
+  fmt_number(columns = vars(mean.value), decimals=2, rows=1:2) %>% 
+  fmt_number(columns = vars(median.value), decimals = 2) %>%
+  fmt_number(columns = vars(sd.value), decimals = 0, rows=1) %>% 
+  fmt_number(columns = vars(sd.value), decimals = 2, rows=1:2) %>% 
+  fmt_number(columns = vars(skew.value), decimals = 2) %>%
+
+tab_source_note(
+    source_note = "Data gathered from USGS and NOAA") %>%
+
+cols_label(
+    variable="Measure",
+    length.value = "Observations",
+    mean.value = "Mean",
+    median.value = "Median",
+    sd.value = "SD",
+    skew.value = "Skewness"  )
+
+
+#Puyallup
+summary.Puya.df %>%
+gt() %>%
+  tab_header(
+    title = md("Summary Statistics of Puyallup Stream")) %>%
+  
+  fmt_passthrough (columns=vars(variable)) %>%
+  fmt_number(columns = vars(length.value), decimals = 0) %>%
+  fmt_number(columns = vars(mean.value), decimals=0, rows=1) %>% 
+  fmt_number(columns = vars(mean.value), decimals=2, rows=1:2) %>% 
+  fmt_number(columns = vars(median.value), decimals = 2) %>%
+  fmt_number(columns = vars(sd.value), decimals = 0, rows=1) %>% 
+  fmt_number(columns = vars(sd.value), decimals = 2, rows=1:2) %>% 
+  fmt_number(columns = vars(skew.value), decimals = 2) %>%
+
+tab_source_note(
+    source_note = "Data gathered from USGS and NOAA") %>%
+
+cols_label(
+    variable="Measure",
+    length.value = "Observations",
+    mean.value = "Mean",
+    median.value = "Median",
+    sd.value = "SD",
+    skew.value = "Skewness"  )
+
+#Tulalip
+summary.Tula.df %>%
+gt() %>%
+  tab_header(
+    title = md("Summary Statistics of Tulalip Stream")) %>%
+  
+  fmt_passthrough (columns=vars(variable)) %>%
+  fmt_number(columns = vars(length.value), decimals = 0) %>%
+  fmt_number(columns = vars(mean.value), decimals=0, rows=1) %>% 
+  fmt_number(columns = vars(mean.value), decimals=2, rows=1:2) %>% 
+  fmt_number(columns = vars(median.value), decimals = 2) %>%
+  fmt_number(columns = vars(sd.value), decimals = 0, rows=1) %>% 
+  fmt_number(columns = vars(sd.value), decimals = 2, rows=1:2) %>% 
+  fmt_number(columns = vars(skew.value), decimals = 2) %>%
+
+tab_source_note(
+    source_note = "Data gathered from USGS and NOAA") %>%
+
+cols_label(
+    variable="Measure",
+    length.value = "Observations",
+    mean.value = "Mean",
+    median.value = "Median",
+    sd.value = "SD",
+    skew.value = "Skewness"  )
+```
+
+```{r, summary statistics}
+SkoSum<-SkokomishENSO%>%
+  select(Discharge,Baseflow,Stormflow,SST,Discharge_acftmo)
+
+tbl<-SkoSum%>%
+  tbl_summary(by=Discharge)
+
+
+              
+              #(Discharge ~ c("{N_nonmiss}", "{mean} ({sd})"),
+#c(grade, response) ~ "{n} / {N} ({p}%)"))
+#%>%
+ # summary()
+
+SkoSum%>%
+  gt()
+KTMonthlytable
+
+DuckabushENSO
+
+PuyallupENSO
+
+TulalipENSO
+
+
+```
 
 
 ```{r, Duckabush}
@@ -443,6 +644,7 @@ TulalipStormStats<-data.frame(
   TulalipWilcoxonTests = c("El Nino ~ Neutral", "La Nina ~ Neutral", "El Nino ~ La Nina"),
   pValue= c(TulalipStormWTEl$p.value, TulalipStormWTLa$p.value, TulalipStormWTEx$p.value))
 ```
+
 ```{r}
 
 KTMonthly<-data.frame(
@@ -458,6 +660,9 @@ KTStorm<-data.frame(
                pValue=c(DuckStormKT$p.value, SkokomishStormKT$p.value,PuyallupStormKT$p.value,TulalipStormKT$p.value))
 
 
+
+KTStormtable
+```
 KTMonthlytable<-KTMonthly%>%
   gt()%>%
   tab_header(title = md("**Monthly Discharge Kruskal-Wallis Rank Sum Results**"))%>%
@@ -480,9 +685,44 @@ KTStormtable<-KTStorm%>%
   cols_label(
     StreamName = md("**Stream**"),
     pValue = md("**p Value**"))
-KTStormtable
-```
+```{r,KT}
+#Base tables
+table1 = KTMonthly
 
+table2 = KTDaily
+
+table3=KTStorm
+
+#If the individual tables are a GT object already, exact the data
+#gtTable = gt(table1)
+#table1 = gtTable$`_data`
+
+
+#Merge tables by row
+fullTable = rbind(table1, table2,table3)
+fullTable
+
+KTgtTable = gt(fullTable) %>%
+  tab_header(title = md("**Kruskal-Wallis Rank Sum for All Streams**"))%>%
+  cols_label(
+    StreamName =  md("**Stream Name**"),
+    pValue =  md("**p Value**"))%>%
+  tab_row_group(
+    group = "Monthly Test",
+    rows = 1:4
+  ) %>% 
+  tab_row_group(
+    group = "Daily Test",
+    rows = 5:8
+  )%>% 
+  tab_row_group(
+    group = "Storm Event Test",
+    rows = 9:12
+  )
+
+KTgtTable
+
+```
 
 ```{r, Puyallup}
 #Base tables
@@ -632,142 +872,166 @@ SkokomishgtTable = gt(fullTable) %>%
 
 SkokomishgtTable
 ```
-```{r,export data?}
-saveRDS(SkokomishgtTable, PuyallupgtTable, DuckgtTable,TulalipgtTable, file="~/Data/Processed/figures.RData")
-#KTMonthlytable,KTDailytable,KTStormtable,
-```
 
 ```{r, discharge plots}
 #Duckabush
-ggplot(DuckabushENSO, aes(x=Date,y=Discharge_acftmo, color=season.class))+
+DuckMonthPlot<-ggplot(DuckabushENSO, aes(x=Date,y=Discharge_acftmo, color=season.class))+
   geom_point(size=3) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Duckabush Monthly Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
 
-ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
+DuckDailyPlot<-ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Duckabush Daily Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
-ggplot(DuckabushENSO, aes(x = Date, y = Stormflow, color=season.class)) +
+DuckStormPlot<-ggplot(DuckabushENSO, aes(x = Date, y = Stormflow, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Duckabush Stormflow Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="bottom")
 
+DuckCombinedPlot <- 
+  plot_grid(DuckMonthPlot, DuckDailyPlot, DuckStormPlot, 
+            ncol = 1, rel_heights = c(1, 1, 1),align = "hv")
+DuckCombinedPlot
 #Puyallup
-ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+PuyallupMonthPlot<-ggplot(PuyallupENSO, aes(x=Date,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
   scale_y_log10()+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Puyallup Monthly Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
 
-ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
+PuyallupDailyPlot<-ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Puyallup Daily Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
-ggplot(PuyallupENSO, aes(x = Date, y = Stormflow, color=season.class)) +
+PuyallupStormPlot<-ggplot(PuyallupENSO, aes(x = Date, y = Stormflow, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Puyallup Stormflow Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="bottom")
 
+PuyaCombinedPlot <- 
+  plot_grid(PuyallupMonthPlot, PuyallupDailyPlot, PuyallupStormPlot, 
+            ncol = 1, rel_heights = c(1, 1, 1),align = "hv")
+PuyaCombinedPlot
 #Tulalip
-ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+TulalipMonthPlot<-ggplot(TulalipENSO, aes(x=Date,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
   scale_y_log10()+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Tulalip Monthly Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
 
-ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
+TulalipDailyPlot<-ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Tulalip Daily Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
-ggplot(TulalipENSO, aes(x = Date, y = Stormflow, color=season.class)) +
+TulalipStormPlot<-ggplot(TulalipENSO, aes(x = Date, y = Stormflow, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Tulalip Stormflow Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="bottom")
 
+TulaCombinedPlot <- 
+  plot_grid(TulalipMonthPlot, TulalipDailyPlot, TulalipStormPlot, 
+            ncol = 1, rel_heights = c(1, 1, 1),align = "hv")
+TulaCombinedPlot
 #Skokomish
-ggplot(SkokomishENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+SkokomishMonthPlot<-ggplot(SkokomishENSO, aes(x=Date,y=Discharge_acftmo, color=season.class))+
   geom_point(size=4) +
   
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Skokomish Monthly Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
 
-ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
+SkokomishDailyPlot<-ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Skokomish Daily Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="none")
 
-ggplot(SkokomishENSO, aes(x = Date, y = Stormflow, color=season.class)) +
+SkokomishStormPlot<-ggplot(SkokomishENSO, aes(x = Date, y = Stormflow, color=season.class)) +
   geom_point(alpha=0.7) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Skokomish Stormflow Discharge")+
-  scale_y_continuous(labels= comma)
+  scale_y_continuous(labels= comma)+
+  theme(legend.position="bottom")
 
+SkoCombinedPlot <- 
+  plot_grid(SkokomishMonthPlot, SkokomishDailyPlot, SkokomishStormPlot, 
+            ncol = 1, rel_heights = c(1, 1, 1),align = "hv")
+SkoCombinedPlot
 #Example
 
 DuckabushSample<- DuckabushENSO %>%
-  filter(Year > 2004 & Year < 2011)
+  filter(Date > 2004 & Date < 2011)
 
 ggplot(DuckabushSample, aes(x=Date,y=Discharge, color=season.class))+
   geom_point(size=4) +
     scale_color_manual(values = c("El Niño"="#feb24c",
                                   "La Niña"="#2c7fb8",
                                   "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)",color="ENSO Season")+
+  labs(x = "Date", y = "Discharge (cfs)",color="ENSO Season")+
   ggtitle("Duckabush Daily Discharge 2005-2010")+
   scale_y_continuous(labels= comma)
 ```
