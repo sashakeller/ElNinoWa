@@ -797,10 +797,7 @@ Can I just recode El Nino/La Nina/Neither as 1,2,3 and run a t test frequency = 
 
 
 #TO DO
-- Put stat tests into variables, put variables into table
-- Make a smaller time frame discharge plot to show variance in season?
 - Put all ggplots together somehow
-- save datasets as objects, so I can put the plot code in another file
 - Finish write up
 
 
