@@ -409,14 +409,6 @@ TulalipWTMLa<-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipLa)
 #Is stormflow different between La Nina and El Nino?
 TulalipWTMEx<-wilcox.test(Discharge_acftmo ~ season.class, data=TulalipEx)
 
-ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
-  geom_point(size=4) +
-    scale_color_manual(values = c("El Niño"="#feb24c",
-                                  "La Niña"="#2c7fb8",
-                                  "Neutral"="#7fcdbb"))+
-  scale_y_log10()+
-  labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Tulalip Monthly Discharge")
 
 
 
@@ -428,14 +420,6 @@ TulalipWTDEl<-wilcox.test(Discharge ~ season.class, data=TulalipEl)
 TulalipWTDLa<-wilcox.test(Discharge ~ season.class, data=TulalipLa)
 #Is stormflow different between La Nina and El Nino?
 TulalipWTDEx<-wilcox.test(Discharge ~ season.class, data=TulalipEx)
-
-ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
-  geom_point(alpha=0.7) +
-    scale_color_manual(values = c("El Niño"="#feb24c",
-                                  "La Niña"="#2c7fb8",
-                                  "Neutral"="#7fcdbb"))+
-  labs(x = "Year", y = "Discharge (cfs)")+
-  ggtitle("Tulalip Daily Discharge")
 
  #What about during the largest precipitation events?
 TulalipStormKT<-kruskal.test(Stormflow ~ season.class, data=TulalipENSO)
@@ -647,9 +631,84 @@ SkokomishgtTable = gt(fullTable) %>%
 
 SkokomishgtTable
 ```
-```{r}
+```{r,export data?}
 saveRDS(SkokomishgtTable, PuyallupgtTable, DuckgtTable,TulalipgtTable, file="~/Data/Processed/figures.RData")
 #KTMonthlytable,KTDailytable,KTStormtable,
+```
+
+```{r, ggplots}
+ggplot(DuckabushENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Monthly Discharge")
+
+
+ggplot(DuckabushENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Duckabush Daily Discharge")
+
+ggplot(PuyallupENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Puyallup Monthly Discharge")
+
+
+ggplot(PuyallupENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Puyallup Daily Discharge")
+
+ggplot(TulalipENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Tulalip Monthly Discharge")
+
+
+ggplot(TulalipENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Tulalip Daily Discharge")
+
+ggplot(SkokomishENSO, aes(x=Year,y=Discharge_acftmo, color=season.class))+
+  geom_point(size=4) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  scale_y_log10()+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Skokomish Monthly Discharge")
+
+
+ggplot(SkokomishENSO, aes(x = Date, y = Discharge, color=season.class)) +
+  geom_point(alpha=0.7) +
+    scale_color_manual(values = c("El Niño"="#feb24c",
+                                  "La Niña"="#2c7fb8",
+                                  "Neutral"="#7fcdbb"))+
+  labs(x = "Year", y = "Discharge (cfs)")+
+  ggtitle("Skokomish Daily Discharge")
+
 ```
 Questions: 
 Is 3 month seasonal mean common water format or just climate data?
