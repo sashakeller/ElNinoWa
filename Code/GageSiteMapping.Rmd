@@ -3,6 +3,8 @@ title: "Untitled"
 author: "Sasha Keller"
 date: "4/20/2022"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -55,20 +57,17 @@ subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
                          return_data = TRUE, overwrite = TRUE)
 
 # Create data frames
-flowline <- subset$NHDFlowline_Network
-catchment <- subset$CatchmentSP
+flowline1 <- subset$NHDFlowline_Network
+catchment1 <- subset$CatchmentSP
 waterbody <- subset$NHDWaterbody
 
-class(flowline)
-class(catchment)
-class(waterbody)
-
 # find gages near watershed
-gages <- get_nwis(AOI = catchment)
-class(gages)
+gages1 <- get_nwis(AOI = catchment1)
+class(gages1)
 
 # find gages only within watershed
-gages <- st_intersection(gages, catchment)
+gages1 <- st_intersection(gages1, catchment1)
+
 
 plot_nhdplus("USGS-12054000", streamorder = 3)
 
@@ -77,14 +76,14 @@ wa <- filter(states, ID == "washington")
 
 ggplot(wa) +
   geom_sf(fill = "white") +
-  geom_sf(data = flowline, aes(color = streamorde)) +
+  geom_sf(data = flowline1, aes(color = streamorde)) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
-ggplot(catchment) +
+ggplot(catchment1) +
   geom_sf(fill = "white", color = "gray", lwd = 0.5) +
-  geom_sf(data = flowline, aes(color = streamorde)) +
-  geom_sf(data = gages, color = "darkred", size = 1) +
+  geom_sf(data = flowline1, aes(color = streamorde)) +
+  geom_sf(data = gages1, color = "darkred", size = 1) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
@@ -122,40 +121,35 @@ subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
                          return_data = TRUE, overwrite = TRUE)
 
 # Create data frames
-flowline <- subset$NHDFlowline_Network
-catchment <- subset$CatchmentSP
+flowline2 <- subset$NHDFlowline_Network
+catchment2 <- subset$CatchmentSP
 waterbody <- subset$NHDWaterbody
 
-class(flowline)
-class(catchment)
-class(waterbody)
-
 # find gages near watershed
-gages <- get_nwis(AOI = catchment)
-class(gages)
+gages2 <- get_nwis(AOI = catchment2)
+class(gages2)
 
 # find gages only within watershed
-gages <- st_intersection(gages, catchment)
+gages2 <- st_intersection(gages2, catchment2)
 
-plot_nhdplus("USGS-12158040", streamorder = 3)
+
+#plot_nhdplus("USGS-12158040", streamorder = 3)
 
 states <- st_as_sf(map(database = "state", plot = FALSE, fill = TRUE, col = "white"))
 wa <- filter(states, ID == "washington")
 
 ggplot(wa) +
   geom_sf(fill = "white") +
-  geom_sf(data = flowline, aes(color = streamorde)) +
+  geom_sf(data = flowline2, aes(color = streamorde)) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
-ggplot(catchment) +
+ggplot(catchment2) +
   geom_sf(fill = "white", color = "gray", lwd = 0.5) +
-  geom_sf(data = flowline, aes(color = streamorde)) +
-  geom_sf(data = gages, color = "darkred", size = 1) +
+  geom_sf(data = flowline2, aes(color = streamorde)) +
+  geom_sf(data = gages2, color = "darkred", size = 1) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
-
-
 
 ```
 
@@ -189,20 +183,17 @@ subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
                          return_data = TRUE, overwrite = TRUE)
 
 # Create data frames
-flowline <- subset$NHDFlowline_Network
-catchment <- subset$CatchmentSP
+flowline3 <- subset$NHDFlowline_Network
+catchment3 <- subset$CatchmentSP
 waterbody <- subset$NHDWaterbody
 
-class(flowline)
-class(catchment)
-class(waterbody)
-
 # find gages near watershed
-gages <- get_nwis(AOI = catchment)
-class(gages)
+gages3 <- get_nwis(AOI = catchment3)
+class(gages3)
 
 # find gages only within watershed
-gages <- st_intersection(gages, catchment)
+gages3 <- st_intersection(gages3, catchment3)
+
 
 plot_nhdplus("USGS-12061500", streamorder = 3)
 
@@ -211,16 +202,18 @@ wa <- filter(states, ID == "washington")
 
 ggplot(wa) +
   geom_sf(fill = "white") +
-  geom_sf(data = flowline, aes(color = streamorde)) +
+  geom_sf(data = flowline3, aes(color = streamorde)) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
-ggplot(catchment) +
+ggplot(catchment3) +
   geom_sf(fill = "white", color = "gray", lwd = 0.5) +
-  geom_sf(data = flowline, aes(color = streamorde)) +
-  geom_sf(data = gages, color = "darkred", size = 1) +
+  geom_sf(data = flowline3, aes(color = streamorde)) +
+  geom_sf(data = gages3, color = "darkred", size = 1) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
+
+
 
 ```
 
@@ -254,20 +247,17 @@ subset <- subset_nhdplus(comids = as.integer(NLDI$UT$nhdplus_comid),
                          return_data = TRUE, overwrite = TRUE)
 
 # Create data frames
-flowline <- subset$NHDFlowline_Network
-catchment <- subset$CatchmentSP
+flowline4 <- subset$NHDFlowline_Network
+catchment4 <- subset$CatchmentSP
 waterbody <- subset$NHDWaterbody
 
-class(flowline)
-class(catchment)
-class(waterbody)
-
 # find gages near watershed
-gages <- get_nwis(AOI = catchment)
-class(gages)
+gages4 <- get_nwis(AOI = catchment4)
+class(gages4)
 
 # find gages only within watershed
-gages <- st_intersection(gages, catchment)
+gages4 <- st_intersection(gages4, catchment4)
+
 
 plot_nhdplus("USGS-12101500", streamorder = 3)
 
@@ -276,14 +266,29 @@ wa <- filter(states, ID == "washington")
 
 ggplot(wa) +
   geom_sf(fill = "white") +
-  geom_sf(data = flowline, aes(color = streamorde)) +
+  geom_sf(data = flowline4, aes(color = streamorde)) +
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
-ggplot(catchment) +
+ggplot(catchment4) +
   geom_sf(fill = "white", color = "gray", lwd = 0.5) +
-  geom_sf(data = flowline, aes(color = streamorde)) +
-  geom_sf(data = gages, color = "darkred", size = 1) +
+  geom_sf(data = flowline4, aes(color = streamorde)) +
+  geom_sf(data = gages4, color = "darkred", size = 1) +
+  labs(color = "Stream Order") +
+  theme(legend.position = "top")
+
+
+
+```
+
+```{r}
+ggplot(wa) +
+  geom_sf(fill = "white") +
+  geom_sf(data = flowline1, aes(color = streamorde)) +
+    geom_sf(data = flowline2, aes(color = streamorde)) +
+    geom_sf(data = flowline3, aes(color = streamorde)) +
+    geom_sf(data = flowline4, aes(color = streamorde)) +
+  coord_sf(xlim = c(-123.6, -121.2), ylim = c(46.5, 48.5), expand = FALSE)+
   labs(color = "Stream Order") +
   theme(legend.position = "top")
 
