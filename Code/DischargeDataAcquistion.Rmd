@@ -23,6 +23,8 @@ library(lfstat)
 library(trend)
 library(gt)
 library(scales)
+library(reshape2)
+library(moments)
 # Set your ggplot theme
 theme_set(theme_classic())
 # Load your datasets
